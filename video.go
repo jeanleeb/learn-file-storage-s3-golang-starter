@@ -3,12 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"os/exec"
-	"strings"
-	"time"
-
-	"github.com/bootdotdev/learn-file-storage-s3-golang-starter/internal/database"
 )
 
 type streamTags struct {
@@ -127,27 +122,4 @@ func processVideoForFastStart(filePath string) (string, error) {
 	}
 
 	return outPath, nil
-}
-
-func (cfg *apiConfig) dbVideoToSignedVideo(video database.Video) (database.Video, error) {
-	if video.VideoURL == nil {
-		return video, nil
-	}
-
-	urlSlice := strings.Split(*video.VideoURL, ",")
-	if len(urlSlice) != 2 {
-		return video, fmt.Errorf("Invalid video URL: %s", *video.VideoURL)
-	}
-	bucket, key := urlSlice[0], urlSlice[1]
-	if bucket == "" || key == "" {
-		return video, fmt.Errorf("Invalid video URL: %s", *video.VideoURL)
-	}
-
-	presigned, err := generatePresignedURL(cfg.s3Client, bucket, key, 1*time.Hour)
-	if err != nil {
-		return video, err
-	}
-
-	video.VideoURL = &presigned
-	return video, nil
 }
